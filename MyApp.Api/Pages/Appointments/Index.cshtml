@@ -1,0 +1,305 @@
+@page
+@model MyApp.Api.Pages.Appointments.IndexModel
+@{
+    ViewData["Title"] = "預約管理";
+}
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>預約管理系統</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f0f4f8; color: #333; }
+
+        .header {
+            background: #1a56db;
+            color: white;
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+        .header h1 { font-size: 1.4rem; }
+        .header nav a {
+            color: white; text-decoration: none; margin-left: 20px;
+            font-size: 0.9rem; opacity: 0.85;
+        }
+        .header nav a:hover { opacity: 1; }
+
+        .container { max-width: 1100px; margin: 32px auto; padding: 0 20px; }
+
+        .search-bar {
+            background: white;
+            border-radius: 10px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .search-bar label { font-size: 0.85rem; color: #555; margin-bottom: 4px; display: block; }
+        .search-bar input, .search-bar select {
+            padding: 8px 12px; border: 1px solid #d1d5db;
+            border-radius: 6px; font-size: 0.9rem; min-width: 180px;
+        }
+
+        .btn {
+            padding: 9px 20px; border: none; border-radius: 6px;
+            font-size: 0.9rem; cursor: pointer; text-decoration: none;
+            display: inline-block; font-weight: 500;
+        }
+        .btn-primary { background: #1a56db; color: white; }
+        .btn-primary:hover { background: #1648c0; }
+        .btn-success { background: #057a55; color: white; }
+        .btn-success:hover { background: #046c4e; }
+        .btn-warning { background: #e3a008; color: white; }
+        .btn-warning:hover { background: #c27803; }
+        .btn-danger { background: #e02424; color: white; }
+        .btn-danger:hover { background: #c81e1e; }
+        .btn-secondary { background: #6b7280; color: white; }
+        .btn-secondary:hover { background: #4b5563; }
+
+        .card {
+            background: white; border-radius: 10px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); overflow: hidden;
+        }
+        .card-header {
+            padding: 16px 24px; border-bottom: 1px solid #e5e7eb;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .card-header h2 { font-size: 1rem; color: #111; }
+
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f9fafb; padding: 12px 16px; text-align: left; font-size: 0.85rem; color: #6b7280; border-bottom: 1px solid #e5e7eb; }
+        td { padding: 14px 16px; border-bottom: 1px solid #f3f4f6; font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f9fafb; }
+
+        .badge {
+            display: inline-block; padding: 3px 10px;
+            border-radius: 20px; font-size: 0.78rem; font-weight: 500;
+        }
+        .badge-blue { background: #e1effe; color: #1a56db; }
+
+        .action-btns { display: flex; gap: 8px; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.5); z-index: 100;
+            align-items: center; justify-content: center;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal {
+            background: white; border-radius: 12px;
+            padding: 32px; width: 480px; max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal h3 { margin-bottom: 20px; font-size: 1.1rem; color: #111; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 0.85rem; color: #374151; margin-bottom: 6px; font-weight: 500; }
+        .form-group input, .form-group select {
+            width: 100%; padding: 9px 12px; border: 1px solid #d1d5db;
+            border-radius: 6px; font-size: 0.9rem;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none; border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+        }
+        .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px; }
+
+        .empty { text-align: center; padding: 48px; color: #9ca3af; }
+        .alert { padding: 12px 16px; border-radius: 6px; margin-bottom: 16px; font-size: 0.9rem; }
+        .alert-success { background: #def7ec; color: #03543f; border: 1px solid #bcf0da; }
+        .alert-error { background: #fde8e8; color: #9b1c1c; border: 1px solid #f8b4b4; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>📅 預約管理系統</h1>
+    <nav>
+        <a href="/Appointments">📅 預約管理</a>
+        <a href="/Users">👤 使用者管理</a>
+    </nav>
+</div>
+
+<div class="container">
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">✅ @TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-error">❌ @TempData["Error"]</div>
+    }
+
+    <!-- 搜尋列 -->
+    <form method="get" class="search-bar">
+        <div>
+            <label>被預約人姓名</label>
+            <input type="text" name="searchName" value="@Model.SearchName" placeholder="搜尋姓名..." />
+        </div>
+        <div>
+            <label>預約日期（起）</label>
+            <input type="date" name="searchDateFrom" value="@Model.SearchDateFrom" />
+        </div>
+        <div>
+            <label>預約日期（迄）</label>
+            <input type="date" name="searchDateTo" value="@Model.SearchDateTo" />
+        </div>
+        <button type="submit" class="btn btn-primary">🔍 查詢</button>
+        <a href="/Appointments" class="btn btn-secondary">重設</a>
+    </form>
+
+    <!-- 預約列表 -->
+    <div class="card">
+        <div class="card-header">
+            <h2>預約清單（共 @Model.Appointments.Count 筆）</h2>
+            <button class="btn btn-success" onclick="openCreateModal()">＋ 新增預約</button>
+        </div>
+
+        @if (Model.Appointments.Count == 0)
+        {
+            <div class="empty">目前沒有符合條件的預約紀錄</div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>使用者</th>
+                        <th>被預約人</th>
+                        <th>預約時間</th>
+                        <th>地點</th>
+                        <th>建立時間</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Appointments)
+                    {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td><span class="badge badge-blue">@(Model.Users.FirstOrDefault(u => u.Id == a.UserId)?.Name ?? "-")</span></td>
+                            <td>@a.AppointeeName</td>
+                            <td>@a.AppointmentTime.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>@a.Location</td>
+                            <td>@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-warning"
+                                        onclick="openEditModal(@a.Id, @a.UserId, '@a.AppointeeName', '@a.AppointmentTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@a.Location')">
+                                        編輯
+                                    </button>
+                                    <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除此預約？')">
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <button type="submit" class="btn btn-danger">刪除</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- 新增 Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal">
+        <h3>＋ 新增預約</h3>
+        <form method="post" asp-page-handler="Create">
+            <div class="form-group">
+                <label>使用者</label>
+                <select name="UserId" required>
+                    <option value="">-- 選擇使用者 --</option>
+                    @foreach (var u in Model.Users)
+                    {
+                        <option value="@u.Id">@u.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>被預約人姓名</label>
+                <input type="text" name="AppointeeName" required placeholder="請輸入姓名" />
+            </div>
+            <div class="form-group">
+                <label>預約時間</label>
+                <input type="datetime-local" name="AppointmentTime" required />
+            </div>
+            <div class="form-group">
+                <label>預約地點</label>
+                <input type="text" name="Location" required placeholder="請輸入地點" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">取消</button>
+                <button type="submit" class="btn btn-success">新增</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 編輯 Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <h3>✏️ 編輯預約</h3>
+        <form method="post" asp-page-handler="Edit">
+            <input type="hidden" name="Id" id="editId" />
+            <div class="form-group">
+                <label>使用者</label>
+                <select name="UserId" id="editUserId" required>
+                    @foreach (var u in Model.Users)
+                    {
+                        <option value="@u.Id">@u.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>被預約人姓名</label>
+                <input type="text" name="AppointeeName" id="editAppointeeName" required />
+            </div>
+            <div class="form-group">
+                <label>預約時間</label>
+                <input type="datetime-local" name="AppointmentTime" id="editAppointmentTime" required />
+            </div>
+            <div class="form-group">
+                <label>預約地點</label>
+                <input type="text" name="Location" id="editLocation" required />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">取消</button>
+                <button type="submit" class="btn btn-primary">儲存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openCreateModal() {
+        document.getElementById('createModal').classList.add('show');
+    }
+    function openEditModal(id, userId, appointeeName, appointmentTime, location) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editUserId').value = userId;
+        document.getElementById('editAppointeeName').value = appointeeName;
+        document.getElementById('editAppointmentTime').value = appointmentTime;
+        document.getElementById('editLocation').value = location;
+        document.getElementById('editModal').classList.add('show');
+    }
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('show');
+    }
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+    });
+</script>
+</body>
+</html>
