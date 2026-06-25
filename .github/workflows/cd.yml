@@ -40,7 +40,7 @@ jobs:
           USER=$(echo $CREDS | jq -r '.user')
           PASS=$(echo $CREDS | jq -r '.pass')
           curl -X POST \
-            "https://myappcicd.scm.azurewebsites.net/api/zipdeploy" \
+            "https://myappcicd-a5a5awhpbzehb9bc.scm.eastasia-01.azurewebsites.net/api/zipdeploy" \
             --user "$USER:$PASS" \
             --data-binary @deploy.zip \
             --max-time 300 \
