@@ -1,0 +1,21 @@
+name: Keep Alive
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Azure App Service
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            https://myappcicd-a5a5awhpbzehb9bc.eastasia-01.azurewebsites.net/Appointments \
+            --max-time 30)
+          echo "HTTP Status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "App is awake!"
+          else
+            echo "App returned $STATUS"
+          fi
