@@ -22,26 +22,9 @@ jobs:
       - name: Publish
         run: dotnet publish MyApp.Api/MyApp.Api.csproj -c Release -o ./publish
 
-      - name: Zip publish output
-        run: cd ./publish && zip -r ../deploy.zip .
-
-      - name: Azure Login
-        uses: azure/login@v2
+      - name: Deploy to Azure App Service
+        uses: azure/webapps-deploy@v3
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - name: Deploy via REST API (Kudu zip deploy)
-        run: |
-          CREDS=$(az webapp deployment list-publishing-credentials \
-            --resource-group myapp-rg \
-            --name myappcicd \
-            --query "{user:publishingUserName, pass:publishingPassword}" \
-            --output json)
-          USER=$(echo $CREDS | jq -r '.user')
-          PASS=$(echo $CREDS | jq -r '.pass')
-          curl -X POST \
-            "https://myappcicd-a5a5awhpbzehb9bc.scm.eastasia-01.azurewebsites.net/api/zipdeploy" \
-            --user "$USER:$PASS" \
-            --data-binary @deploy.zip \
-            --max-time 300 \
-            -w "\nHTTP Status: %{http_code}\n"
+          app-name: myappcicd
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ./publish
