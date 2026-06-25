@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MyApp — CI/CD Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #0d1117;
+      color: #c9d1d9;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 48px 56px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    .badge {
+      display: inline-block;
+      background: #238636;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      letter-spacing: 1px;
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      color: #e6edf3;
+      margin-bottom: 12px;
+    }
+
+    h1 span { color: #58a6ff; }
+
+    .subtitle {
+      color: #8b949e;
+      font-size: 1rem;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 40px;
+      text-align: left;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #0d1117;
+      border: 1px solid #30363d;
+      border-radius: 8px;
+      padding: 14px 18px;
+    }
+
+    .step-icon {
+      font-size: 1.2rem;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    .step-text { font-size: 0.9rem; color: #c9d1d9; }
+    .step-text strong { color: #58a6ff; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #30363d;
+      margin: 0 0 28px;
+    }
+
+    .meta {
+      font-size: 0.8rem;
+      color: #6e7681;
+      line-height: 1.8;
+    }
+
+    .meta a {
+      color: #58a6ff;
+      text-decoration: none;
+    }
+
+    .meta a:hover { text-decoration: underline; }
+
+    .dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #3fb950;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="badge">✦ DEPLOYED VIA CI/CD</div>
+
+    <h1>Hello, <span>MyApp</span> 👋</h1>
+
+    <p class="subtitle">
+      這個頁面由 <strong>GitHub Actions</strong> 自動部署。<br />
+      每次 push 程式碼，這裡就會自動更新。
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-icon">📝</div>
+        <div class="step-text">本地修改程式碼</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">⬆️</div>
+        <div class="step-text"><strong>git push</strong> → 觸發 GitHub Actions</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">🔨</div>
+        <div class="step-text">Ubuntu Runner 自動建置 + 測試</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">🚀</div>
+        <div class="step-text">測試通過 → 自動部署到 GitHub Pages</div>
+      </div>
+      <div class="step">
+        <div class="step-icon">🌍</div>
+        <div class="step-text"><strong>你現在看到的這個頁面</strong></div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <div class="meta">
+      <span class="dot"></span> 部署中<br />
+      Repository：<a href="https://github.com/happyewq/MyApp" target="_blank">happyewq/MyApp</a><br />
+      技術棧：.NET 10 · GitHub Actions · GitHub Pages
+    </div>
+  </div>
+</body>
+</html>
