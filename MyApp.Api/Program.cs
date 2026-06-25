@@ -1,10 +1,18 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowGitHubPages", policy =>
+        policy.WithOrigins("https://happyewq.github.io")
+              .AllowAnyMethod()
+              .AllowAnyHeader());
+});
+
 var app = builder.Build();
+
+app.UseCors("AllowGitHubPages");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
