@@ -22,9 +22,19 @@ jobs:
       - name: Publish
         run: dotnet publish MyApp.Api/MyApp.Api.csproj -c Release -o ./publish
 
-      - name: Deploy to Azure App Service
-        uses: azure/webapps-deploy@v3
+      - name: Zip publish output
+        run: cd ./publish && zip -r ../deploy.zip .
+
+      - name: Azure Login
+        uses: azure/login@v2
         with:
-          app-name: myappcicd
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: ./publish
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Deploy to Azure App Service (zip deploy)
+        run: |
+          az webapp deploy \
+            --resource-group myapp-rg \
+            --name myappcicd \
+            --src-path deploy.zip \
+            --type zip \
+            --timeout 300
