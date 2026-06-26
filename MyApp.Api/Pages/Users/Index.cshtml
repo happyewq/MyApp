@@ -84,7 +84,8 @@ else
         <div style="display:flex;justify-content:center;margin-bottom:20px;"><div id="qrcode"></div></div>
         <p id="qrModalUrl" style="font-size:0.72rem;color:#d1d5db;word-break:break-all;margin-bottom:16px;"></p>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" onclick="closeModal('qrModal')" style="flex:1;">關閉</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal('qrModal')">關閉</button>
+            <a id="qrAddFriendBtn" href="#" target="_blank" class="btn btn-success">💬 加入好友</a>
         </div>
     </div>
 </div>
@@ -248,6 +249,7 @@ else
     function showQrCode(name, url) {
         document.getElementById('qrModalTitle').textContent = name + ' · LINE QR Code';
         document.getElementById('qrModalUrl').textContent = url;
+        document.getElementById('qrAddFriendBtn').href = url;
         var container = document.getElementById('qrcode');
         container.innerHTML = '';
         new QRCode(container, { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
