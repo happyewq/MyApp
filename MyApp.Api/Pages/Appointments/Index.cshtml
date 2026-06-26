@@ -11,78 +11,122 @@
 }
 
 <form method="get" class="search-bar">
-    <div>
+    <div class="search-field">
         <label>被預約人姓名</label>
         <input type="text" name="searchName" value="@Model.SearchName" placeholder="搜尋姓名..." />
     </div>
-    <div>
+    <div class="search-field">
         <label>預約日期（起）</label>
         <input type="date" name="searchDateFrom" value="@Model.SearchDateFrom" />
     </div>
-    <div>
+    <div class="search-field">
         <label>預約日期（迄）</label>
         <input type="date" name="searchDateTo" value="@Model.SearchDateTo" />
     </div>
-    <button type="submit" class="btn btn-primary">🔍 查詢</button>
-    <a href="/Appointments" class="btn btn-secondary">重設</a>
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+        <button type="submit" class="btn btn-primary">🔍 查詢</button>
+        <a href="/Appointments" class="btn btn-secondary">重設</a>
+    </div>
 </form>
 
 <div class="card">
     <div class="card-header">
         <h2>預約清單（共 @Model.Appointments.Count 筆）</h2>
-        <button class="btn btn-success" onclick="openCreateModal()">＋ 新增預約</button>
+        <button class="btn btn-success desktop-add-btn" onclick="openCreateModal()">＋ 新增預約</button>
     </div>
 
     @if (Model.Appointments.Count == 0)
     {
-        <div class="empty">目前沒有符合條件的預約紀錄</div>
+        <div class="empty">📭 目前沒有符合條件的預約紀錄</div>
     }
     else
     {
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>使用者</th>
-                    <th>被預約人</th>
-                    <th>預約時間</th>
-                    <th>地點</th>
-                    <th>建立時間</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var a in Model.Appointments)
-                {
+        <!-- Desktop Table -->
+        <div class="table-wrap">
+            <table>
+                <thead>
                     <tr>
-                        <td>@a.Id</td>
-                        <td><span class="badge badge-blue">@(Model.Users.FirstOrDefault(u => u.Id == a.UserId)?.Name ?? "-")</span></td>
-                        <td>@a.AppointeeName</td>
-                        <td>@a.AppointmentTime.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
-                        <td>@a.Location</td>
-                        <td>@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="btn btn-warning"
-                                    onclick="openEditModal(@a.Id, @a.UserId, '@a.AppointeeName', '@a.AppointmentTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@a.Location')">
-                                    編輯
-                                </button>
-                                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除此預約？')">
-                                    <input type="hidden" name="id" value="@a.Id" />
-                                    <button type="submit" class="btn btn-danger">刪除</button>
-                                </form>
-                            </div>
-                        </td>
+                        <th>#</th>
+                        <th>使用者</th>
+                        <th>被預約人</th>
+                        <th>預約時間</th>
+                        <th>地點</th>
+                        <th>建立時間</th>
+                        <th>操作</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Appointments)
+                    {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td><span class="badge badge-blue">@(Model.Users.FirstOrDefault(u => u.Id == a.UserId)?.Name ?? "-")</span></td>
+                            <td>@a.AppointeeName</td>
+                            <td>@a.AppointmentTime.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>@a.Location</td>
+                            <td>@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-warning btn-sm"
+                                        onclick="openEditModal(@a.Id, @a.UserId, '@a.AppointeeName', '@a.AppointmentTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@a.Location')">
+                                        編輯
+                                    </button>
+                                    <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除此預約？')">
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">刪除</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="mobile-list" style="padding:12px;">
+            @foreach (var a in Model.Appointments)
+            {
+                <div class="mobile-card">
+                    <div class="mobile-card-row">
+                        <span class="badge badge-blue">@(Model.Users.FirstOrDefault(u => u.Id == a.UserId)?.Name ?? "-")</span>
+                        <span style="font-size:0.75rem;color:#9ca3af;">#@a.Id</span>
+                    </div>
+                    <div class="mobile-card-row" style="margin-top:10px;">
+                        <span class="mobile-card-label">被預約人</span>
+                        <span class="mobile-card-value">@a.AppointeeName</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">預約時間</span>
+                        <span class="mobile-card-value">@a.AppointmentTime.ToLocalTime().ToString("MM/dd HH:mm")</span>
+                    </div>
+                    <div class="mobile-card-row">
+                        <span class="mobile-card-label">地點</span>
+                        <span class="mobile-card-value">@a.Location</span>
+                    </div>
+                    <div class="mobile-card-actions">
+                        <button class="btn btn-warning btn-sm"
+                            onclick="openEditModal(@a.Id, @a.UserId, '@a.AppointeeName', '@a.AppointmentTime.ToLocalTime().ToString("yyyy-MM-ddTHH:mm")', '@a.Location')">
+                            ✏️ 編輯
+                        </button>
+                        <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除此預約？')" style="flex:1;">
+                            <input type="hidden" name="id" value="@a.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" style="width:100%;">🗑️ 刪除</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
     }
 </div>
+
+<!-- FAB (mobile) -->
+<button class="fab" onclick="openCreateModal()">＋</button>
 
 <!-- 新增 Modal -->
 <div class="modal-overlay" id="createModal">
     <div class="modal">
+        <div class="modal-handle"></div>
         <h3>＋ 新增預約</h3>
         <form method="post" asp-page-handler="Create">
             <div class="form-group">
@@ -118,6 +162,7 @@
 <!-- 編輯 Modal -->
 <div class="modal-overlay" id="editModal">
     <div class="modal">
+        <div class="modal-handle"></div>
         <h3>✏️ 編輯預約</h3>
         <form method="post" asp-page-handler="Edit">
             <input type="hidden" name="Id" id="editId" />
@@ -152,18 +197,14 @@
 
 @section Scripts {
 <script>
-    function openCreateModal() { document.getElementById('createModal').classList.add('show'); }
+    function openCreateModal() { openModal('createModal'); }
     function openEditModal(id, userId, appointeeName, appointmentTime, location) {
         document.getElementById('editId').value = id;
         document.getElementById('editUserId').value = userId;
         document.getElementById('editAppointeeName').value = appointeeName;
         document.getElementById('editAppointmentTime').value = appointmentTime;
         document.getElementById('editLocation').value = location;
-        document.getElementById('editModal').classList.add('show');
+        openModal('editModal');
     }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-    document.querySelectorAll('.modal-overlay').forEach(el => {
-        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
-    });
 </script>
 }

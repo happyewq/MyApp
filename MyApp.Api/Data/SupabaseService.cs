@@ -85,10 +85,34 @@ public class SupabaseService
         await _http.DeleteAsync($"/rest/v1/Appointments?id=eq.{id}");
     }
 
-    public async Task CreateUserAsync(string name)
+    public async Task CreateUserAsync(User u)
     {
-        var body = JsonSerializer.Serialize(new { name, created_at = DateTimeOffset.UtcNow.ToString("o") });
+        var body = JsonSerializer.Serialize(new
+        {
+            name = u.Name,
+            phone = u.Phone,
+            address = u.Address,
+            line_qrcode = u.LineQrcode,
+            created_at = DateTimeOffset.UtcNow.ToString("o"),
+        });
         var req = new HttpRequestMessage(HttpMethod.Post, "/rest/v1/Users")
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+        req.Headers.Add("Prefer", "return=minimal");
+        await _http.SendAsync(req);
+    }
+
+    public async Task UpdateUserAsync(User u)
+    {
+        var body = JsonSerializer.Serialize(new
+        {
+            name = u.Name,
+            phone = u.Phone,
+            address = u.Address,
+            line_qrcode = u.LineQrcode,
+        });
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/rest/v1/Users?id=eq.{u.Id}")
         {
             Content = new StringContent(body, Encoding.UTF8, "application/json")
         };

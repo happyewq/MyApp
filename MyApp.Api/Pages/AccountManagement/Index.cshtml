@@ -11,72 +11,113 @@
 }
 
 <form method="get" class="search-bar">
-    <div>
+    <div class="search-field">
         <label>搜尋帳號 / 姓名</label>
         <input type="text" name="searchName" value="@Model.SearchName" placeholder="搜尋..." />
     </div>
-    <button type="submit" class="btn btn-primary">🔍 查詢</button>
-    <a href="/AccountManagement" class="btn btn-secondary">重設</a>
+    <div style="display:flex;gap:8px;align-items:flex-end;">
+        <button type="submit" class="btn btn-primary">🔍 查詢</button>
+        <a href="/AccountManagement" class="btn btn-secondary">重設</a>
+    </div>
 </form>
 
 <div class="card">
     <div class="card-header">
         <h2>帳號清單（共 @Model.Accounts.Count 筆）</h2>
-        <button class="btn btn-success" onclick="openCreateModal()">＋ 新增帳號</button>
+        <button class="btn btn-success desktop-add-btn" onclick="openCreateModal()">＋ 新增帳號</button>
     </div>
 
     @if (Model.Accounts.Count == 0)
     {
-        <div class="empty">目前沒有符合條件的帳號</div>
+        <div class="empty">📭 目前沒有符合條件的帳號</div>
     }
     else
     {
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>姓名</th>
-                    <th>帳號</th>
-                    <th>權限</th>
-                    <th>建立時間</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var a in Model.Accounts)
-                {
+        <!-- Desktop Table -->
+        <div class="table-wrap">
+            <table>
+                <thead>
                     <tr>
-                        <td>@a.Id</td>
-                        <td>@a.Name</td>
-                        <td>@a.Username</td>
-                        <td>
-                            <span class="badge @(a.Role == "admin" ? "badge-blue" : "badge-gray")">
-                                @(a.Role == "admin" ? "管理員" : "一般使用者")
-                            </span>
-                        </td>
-                        <td>@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
-                        <td>
-                            <div class="action-btns">
-                                <button class="btn btn-warning"
-                                    onclick="openEditModal(@a.Id, '@a.Name', '@a.Username', '@a.Role')">
-                                    編輯
-                                </button>
-                                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除帳號「@a.Username」？')">
-                                    <input type="hidden" name="id" value="@a.Id" />
-                                    <button type="submit" class="btn btn-danger">刪除</button>
-                                </form>
-                            </div>
-                        </td>
+                        <th>#</th>
+                        <th>姓名</th>
+                        <th>帳號</th>
+                        <th>權限</th>
+                        <th>建立時間</th>
+                        <th>操作</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.Accounts)
+                    {
+                        <tr>
+                            <td>@a.Id</td>
+                            <td>@a.Name</td>
+                            <td>@a.Username</td>
+                            <td>
+                                <span class="badge @(a.Role == "admin" ? "badge-blue" : "badge-gray")">
+                                    @(a.Role == "admin" ? "管理員" : "一般使用者")
+                                </span>
+                            </td>
+                            <td>@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                            <td>
+                                <div class="action-btns">
+                                    <button class="btn btn-warning btn-sm"
+                                        onclick="openEditModal(@a.Id, '@a.Name', '@a.Username', '@a.Role')">
+                                        編輯
+                                    </button>
+                                    <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除帳號「@a.Username」？')">
+                                        <input type="hidden" name="id" value="@a.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm">刪除</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="mobile-list" style="padding:12px;">
+            @foreach (var a in Model.Accounts)
+            {
+                <div class="mobile-card">
+                    <div class="mobile-card-row">
+                        <div>
+                            <div style="font-size:1rem;font-weight:700;color:#111827;">@a.Name</div>
+                            <div style="font-size:0.8rem;color:#6b7280;margin-top:2px;">@@a.Username</div>
+                        </div>
+                        <span class="badge @(a.Role == "admin" ? "badge-blue" : "badge-gray")">
+                            @(a.Role == "admin" ? "管理員" : "一般")
+                        </span>
+                    </div>
+                    <div class="mobile-card-row" style="margin-top:8px;">
+                        <span class="mobile-card-label">建立時間</span>
+                        <span class="mobile-card-value">@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</span>
+                    </div>
+                    <div class="mobile-card-actions">
+                        <button class="btn btn-warning btn-sm"
+                            onclick="openEditModal(@a.Id, '@a.Name', '@a.Username', '@a.Role')">
+                            ✏️ 編輯
+                        </button>
+                        <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除帳號「@a.Username」？')" style="flex:1;">
+                            <input type="hidden" name="id" value="@a.Id" />
+                            <button type="submit" class="btn btn-danger btn-sm" style="width:100%;">🗑️ 刪除</button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
     }
 </div>
+
+<!-- FAB (mobile) -->
+<button class="fab" onclick="openCreateModal()">＋</button>
 
 <!-- 新增 Modal -->
 <div class="modal-overlay" id="createModal">
     <div class="modal">
+        <div class="modal-handle"></div>
         <h3>＋ 新增帳號</h3>
         <form method="post" asp-page-handler="Create">
             <div class="form-group">
@@ -109,6 +150,7 @@
 <!-- 編輯 Modal -->
 <div class="modal-overlay" id="editModal">
     <div class="modal">
+        <div class="modal-handle"></div>
         <h3>✏️ 編輯帳號</h3>
         <form method="post" asp-page-handler="Edit">
             <input type="hidden" name="Id" id="editId" />
@@ -141,18 +183,14 @@
 
 @section Scripts {
 <script>
-    function openCreateModal() { document.getElementById('createModal').classList.add('show'); }
+    function openCreateModal() { openModal('createModal'); }
     function openEditModal(id, name, username, role) {
         document.getElementById('editId').value = id;
         document.getElementById('editName').value = name;
         document.getElementById('editUsername').value = username;
         document.getElementById('editPassword').value = '';
         document.getElementById('editRole').value = role;
-        document.getElementById('editModal').classList.add('show');
+        openModal('editModal');
     }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-    document.querySelectorAll('.modal-overlay').forEach(el => {
-        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
-    });
 </script>
 }

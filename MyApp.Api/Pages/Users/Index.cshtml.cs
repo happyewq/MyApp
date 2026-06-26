@@ -17,10 +17,32 @@ public class IndexModel(SupabaseService db) : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostCreateAsync(string Name)
+    public async Task<IActionResult> OnPostCreateAsync(
+        string Name, string? Phone, string? Address, string? LineQrcode)
     {
-        await db.CreateUserAsync(Name);
+        await db.CreateUserAsync(new User
+        {
+            Name = Name,
+            Phone = Phone,
+            Address = Address,
+            LineQrcode = LineQrcode,
+        });
         TempData["Success"] = "使用者新增成功！";
+        return RedirectToPage();
+    }
+
+    public async Task<IActionResult> OnPostEditAsync(
+        long Id, string Name, string? Phone, string? Address, string? LineQrcode)
+    {
+        await db.UpdateUserAsync(new User
+        {
+            Id = Id,
+            Name = Name,
+            Phone = Phone,
+            Address = Address,
+            LineQrcode = LineQrcode,
+        });
+        TempData["Success"] = "使用者資料更新成功！";
         return RedirectToPage();
     }
 

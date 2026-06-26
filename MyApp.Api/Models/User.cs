@@ -13,6 +13,15 @@ public class User
     [Required]
     public string Name { get; set; } = string.Empty;
 
+    [Column("phone")]
+    public string? Phone { get; set; }
+
+    [Column("address")]
+    public string? Address { get; set; }
+
+    [Column("line_qrcode")]
+    public string? LineQrcode { get; set; }
+
     [Column("created_at")]
     public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 }

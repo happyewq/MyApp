@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "使用者管理";
     ViewData["Page"] = "users";
+    var colors = new[] { "#1d4ed8","#059669","#d97706","#7c3aed","#db2777","#0891b2","#65a30d","#ea580c" };
 }
 
 @if (TempData["Success"] != null)
@@ -10,67 +11,256 @@
     <div class="alert alert-success">✅ @TempData["Success"]</div>
 }
 
-<div class="card">
-    <div class="card-header">
-        <h2>使用者清單（共 @Model.Users.Count 人）</h2>
-        <button class="btn btn-success" onclick="document.getElementById('createModal').classList.add('show')">＋ 新增使用者</button>
+<div class="users-toolbar">
+    <div class="users-search-wrap">
+        <span class="users-search-icon">🔍</span>
+        <input type="text" id="userSearch" placeholder="搜尋姓名..." oninput="filterUsers(this.value)" />
     </div>
-
-    @if (Model.Users.Count == 0)
-    {
-        <div class="empty">目前沒有使用者，請先新增</div>
-    }
-    else
-    {
-        <table>
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>姓名</th>
-                    <th>建立時間</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var u in Model.Users)
-                {
-                    <tr>
-                        <td>@u.Id</td>
-                        <td>@u.Name</td>
-                        <td>@u.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
-                        <td>
-                            <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除使用者「@u.Name」？')">
-                                <input type="hidden" name="id" value="@u.Id" />
-                                <button type="submit" class="btn btn-danger">刪除</button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div class="users-count">共 <strong id="usersCountNum">@Model.Users.Count</strong> 位</div>
+        <button class="btn btn-success desktop-add-btn" onclick="openModal('createModal')">＋ 新增使用者</button>
+    </div>
 </div>
 
+@if (Model.Users.Count == 0)
+{
+    <div class="users-empty">
+        <div class="users-empty-icon">👥</div>
+        <div class="users-empty-text">目前沒有使用者</div>
+        <button class="btn btn-success" onclick="openModal('createModal')">＋ 新增第一位使用者</button>
+    </div>
+}
+else
+{
+    <div class="users-grid">
+        @foreach (var u in Model.Users)
+        {
+            var color = colors[(int)(u.Id % colors.Length)];
+            var initial = u.Name.Length > 0 ? u.Name[0].ToString() : "?";
+            <div class="user-card" data-name="@u.Name.ToLower()">
+                <div class="user-card-avatar" style="background: @color;">@initial</div>
+                <div class="user-card-name">@u.Name</div>
+
+                @if (!string.IsNullOrEmpty(u.Phone))
+                {
+                    <div class="user-card-info"><span class="info-icon">📞</span>@u.Phone</div>
+                }
+                @if (!string.IsNullOrEmpty(u.Address))
+                {
+                    <div class="user-card-info"><span class="info-icon">📍</span>@u.Address</div>
+                }
+                @if (!string.IsNullOrEmpty(u.LineQrcode))
+                {
+                    <div class="user-card-info"><span class="info-icon">💬</span>
+                        <button type="button" class="line-qr-badge" onclick="showQrCode('@u.Name', '@u.LineQrcode')">
+                            LINE 顯示 QR Code
+                        </button>
+                    </div>
+                }
+
+                <div class="user-card-date">加入 @u.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd")</div>
+
+                <div class="user-card-actions">
+                    <button class="btn btn-warning btn-sm"
+                        onclick="openEditModal(@u.Id, '@u.Name', '@(u.Phone ?? "")', '@(u.Address ?? "")', '@(u.LineQrcode ?? "")')">
+                        ✏️ 編輯
+                    </button>
+                    <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除使用者「@u.Name」？')">
+                        <input type="hidden" name="id" value="@u.Id" />
+                        <button type="submit" class="btn btn-danger btn-sm">🗑️</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- QR Code Modal -->
+<div class="modal-overlay" id="qrModal">
+    <div class="modal" style="align-items:center;text-align:center;">
+        <div class="modal-handle"></div>
+        <h3 id="qrModalTitle">LINE QR Code</h3>
+        <p style="font-size:0.8rem;color:#9ca3af;margin-bottom:20px;">掃描加入好友</p>
+        <div style="display:flex;justify-content:center;margin-bottom:20px;"><div id="qrcode"></div></div>
+        <p id="qrModalUrl" style="font-size:0.72rem;color:#d1d5db;word-break:break-all;margin-bottom:16px;"></p>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeModal('qrModal')" style="flex:1;">關閉</button>
+        </div>
+    </div>
+</div>
+
+<!-- FAB (mobile) -->
+<button class="fab" onclick="openModal('createModal')">＋</button>
+
+<!-- 新增 Modal -->
 <div class="modal-overlay" id="createModal">
     <div class="modal">
+        <div class="modal-handle"></div>
         <h3>＋ 新增使用者</h3>
         <form method="post" asp-page-handler="Create">
             <div class="form-group">
-                <label>姓名</label>
-                <input type="text" name="Name" required placeholder="請輸入使用者姓名" autofocus />
+                <label>姓名 <span style="color:#dc2626;">*</span></label>
+                <input type="text" name="Name" required placeholder="請輸入姓名" autofocus />
+            </div>
+            <div class="form-group">
+                <label>電話</label>
+                <input type="tel" name="Phone" placeholder="例：0912-345-678" />
+            </div>
+            <div class="form-group">
+                <label>地址</label>
+                <input type="text" name="Address" placeholder="例：台北市信義區..." />
+            </div>
+            <div class="form-group">
+                <label>LINE QR Code 連結</label>
+                <input type="url" name="LineQrcode" placeholder="https://line.me/..." />
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('createModal').classList.remove('show')">取消</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">取消</button>
                 <button type="submit" class="btn btn-success">新增</button>
             </div>
         </form>
     </div>
 </div>
 
+<!-- 編輯 Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <div class="modal-handle"></div>
+        <h3>✏️ 編輯使用者</h3>
+        <form method="post" asp-page-handler="Edit">
+            <input type="hidden" name="Id" id="editId" />
+            <div class="form-group">
+                <label>姓名 <span style="color:#dc2626;">*</span></label>
+                <input type="text" name="Name" id="editName" required />
+            </div>
+            <div class="form-group">
+                <label>電話</label>
+                <input type="tel" name="Phone" id="editPhone" placeholder="例：0912-345-678" />
+            </div>
+            <div class="form-group">
+                <label>地址</label>
+                <input type="text" name="Address" id="editAddress" placeholder="例：台北市信義區..." />
+            </div>
+            <div class="form-group">
+                <label>LINE QR Code 連結</label>
+                <input type="url" name="LineQrcode" id="editLineQrcode" placeholder="https://line.me/..." />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">取消</button>
+                <button type="submit" class="btn btn-primary">儲存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<style>
+    .users-toolbar {
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 16px; gap: 12px; flex-wrap: wrap;
+    }
+    .users-search-wrap {
+        position: relative; flex: 1; min-width: 180px; max-width: 320px;
+    }
+    .users-search-wrap input {
+        width: 100%; padding: 9px 12px 9px 36px;
+        border: 1.5px solid #e5e7eb; border-radius: 8px;
+        font-size: 0.875rem; background: white; color: #374151;
+        transition: border-color 0.15s;
+    }
+    .users-search-wrap input:focus { outline: none; border-color: #3b82f6; }
+    .users-search-icon {
+        position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+        font-size: 0.9rem; pointer-events: none;
+    }
+    .users-count { font-size: 0.9rem; color: #6b7280; white-space: nowrap; }
+    .users-count strong { color: #111827; }
+    .user-card.hidden { display: none; }
+
+    .users-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+    .user-card {
+        background: white; border-radius: 14px; padding: 20px 16px 16px;
+        border: 1px solid #f1f5f9; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+        transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .user-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .user-card-avatar {
+        width: 56px; height: 56px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem; font-weight: 800; color: white;
+        margin-bottom: 12px;
+    }
+    .user-card-name { font-size: 1rem; font-weight: 700; color: #111827; margin-bottom: 10px; }
+    .user-card-info {
+        display: flex; align-items: center; gap: 5px;
+        font-size: 0.78rem; color: #6b7280; margin-bottom: 5px;
+        width: 100%; justify-content: center;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+    .info-icon { font-size: 0.85rem; flex-shrink: 0; }
+    .line-qr-badge {
+        background: #dcfce7; color: #166534; border-radius: 20px;
+        padding: 2px 10px; font-size: 0.72rem; font-weight: 600;
+        border: none; cursor: pointer; transition: background 0.15s;
+    }
+    .line-qr-badge:hover { background: #bbf7d0; }
+    .user-card-date { font-size: 0.72rem; color: #d1d5db; margin: 8px 0 14px; }
+    .user-card-actions { display: flex; gap: 8px; width: 100%; margin-top: auto; }
+    .user-card-actions .btn { flex: 1; justify-content: center; }
+
+    .users-empty {
+        background: white; border-radius: 14px; padding: 60px 24px;
+        text-align: center; border: 1px solid #f1f5f9;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .users-empty-icon { font-size: 3rem; margin-bottom: 12px; }
+    .users-empty-text { font-size: 1rem; color: #9ca3af; margin-bottom: 20px; }
+
+    @@media (max-width: 900px) {
+        .users-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @@media (max-width: 480px) {
+        .users-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .user-card { padding: 14px 10px 12px; }
+        .user-card-avatar { width: 44px; height: 44px; font-size: 1.1rem; }
+        .user-card-name { font-size: 0.88rem; }
+    }
+</style>
 <script>
-    document.getElementById('createModal').addEventListener('click', function(e) {
-        if (e.target === this) this.classList.remove('show');
-    });
+    function filterUsers(keyword) {
+        var kw = keyword.trim().toLowerCase();
+        var cards = document.querySelectorAll('.user-card');
+        var count = 0;
+        cards.forEach(function(card) {
+            var match = !kw || card.dataset.name.includes(kw);
+            card.classList.toggle('hidden', !match);
+            if (match) count++;
+        });
+        document.getElementById('usersCountNum').textContent = count;
+    }
+
+    function showQrCode(name, url) {
+        document.getElementById('qrModalTitle').textContent = name + ' · LINE QR Code';
+        document.getElementById('qrModalUrl').textContent = url;
+        var container = document.getElementById('qrcode');
+        container.innerHTML = '';
+        new QRCode(container, { text: url, width: 200, height: 200, correctLevel: QRCode.CorrectLevel.M });
+        openModal('qrModal');
+    }
+
+    function openEditModal(id, name, phone, address, lineQrcode) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editPhone').value = phone;
+        document.getElementById('editAddress').value = address;
+        document.getElementById('editLineQrcode').value = lineQrcode;
+        openModal('editModal');
+    }
 </script>
 }
