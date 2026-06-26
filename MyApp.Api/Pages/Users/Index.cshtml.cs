@@ -9,9 +9,12 @@ public class IndexModel(SupabaseService db) : PageModel
 {
     public List<User> Users { get; set; } = [];
 
-    public async Task OnGetAsync()
+    public async Task<IActionResult> OnGetAsync()
     {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserId")))
+            return RedirectToPage("/Login/Index");
         Users = await db.GetUsersAsync();
+        return Page();
     }
 
     public async Task<IActionResult> OnPostCreateAsync(string Name)

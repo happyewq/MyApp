@@ -13,13 +13,22 @@ public class IndexModel(SupabaseService db) : PageModel
     public string? SearchDateFrom { get; set; }
     public string? SearchDateTo { get; set; }
 
-    public async Task OnGetAsync(string? searchName, string? searchDateFrom, string? searchDateTo)
+    public async Task<IActionResult> OnGetAsync(string? searchName, string? searchDateFrom, string? searchDateTo)
     {
+        if (string.IsNullOrEmpty(HttpContext.Session.GetString("UserId")))
+            return RedirectToPage("/Login/Index");
         SearchName = searchName;
         SearchDateFrom = searchDateFrom;
         SearchDateTo = searchDateTo;
         Users = await db.GetUsersAsync();
         Appointments = await db.GetAppointmentsAsync(searchName, searchDateFrom, searchDateTo);
+        return Page();
+    }
+
+    public IActionResult OnPostLogout()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToPage("/Login/Index");
     }
 
     public async Task<IActionResult> OnPostCreateAsync(long UserId, string AppointeeName, DateTimeOffset AppointmentTime, string Location)

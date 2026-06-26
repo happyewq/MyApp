@@ -1,0 +1,138 @@
+@page
+@model MyApp.Api.Pages.Login.IndexModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BNI 預約資訊系統</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a56db 0%, #0e3a8a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: white;
+            border-radius: 16px;
+            padding: 48px 40px;
+            width: 400px;
+            max-width: 95vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .logo .title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1a56db;
+            margin-bottom: 4px;
+        }
+        .logo .subtitle {
+            font-size: 0.9rem;
+            color: #6b7280;
+        }
+        .logo .bni-badge {
+            display: inline-block;
+            background: #1a56db;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 900;
+            padding: 8px 20px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            letter-spacing: 4px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            color: #374151;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #1a56db;
+            box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
+        }
+        .btn-login {
+            width: 100%;
+            padding: 13px;
+            background: #1a56db;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .btn-login:hover { background: #1648c0; }
+        .error {
+            background: #fde8e8;
+            color: #9b1c1c;
+            border: 1px solid #f8b4b4;
+            border-radius: 6px;
+            padding: 10px 14px;
+            font-size: 0.88rem;
+            margin-bottom: 16px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.8rem;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <div class="bni-badge">BNI</div>
+            <div class="title">預約資訊系統</div>
+            <div class="subtitle">Business Network International</div>
+        </div>
+
+        @if (Model.ErrorMessage != null)
+        {
+            <div class="error">❌ @Model.ErrorMessage</div>
+        }
+
+        <form method="post">
+            <div class="form-group">
+                <label>帳號</label>
+                <input type="text" name="username" placeholder="請輸入帳號" required autofocus />
+            </div>
+            <div class="form-group">
+                <label>密碼</label>
+                <input type="password" name="password" placeholder="請輸入密碼" required />
+            </div>
+            <button type="submit" class="btn-login">登入</button>
+        </form>
+
+        <div class="footer">© 2026 BNI 預約資訊系統</div>
+    </div>
+</body>
+</html>

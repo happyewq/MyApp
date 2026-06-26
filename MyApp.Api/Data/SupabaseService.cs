@@ -100,4 +100,55 @@ public class SupabaseService
     {
         await _http.DeleteAsync($"/rest/v1/Users?id=eq.{id}");
     }
+
+    public async Task<UserAccount?> LoginAsync(string username, string password)
+    {
+        var res = await _http.GetStringAsync(
+            $"/rest/v1/UserAccounts?username=eq.{Uri.EscapeDataString(username)}&password=eq.{Uri.EscapeDataString(password)}&limit=1");
+        var list = JsonSerializer.Deserialize<List<UserAccount>>(res, _json);
+        return list?.FirstOrDefault();
+    }
+
+    public async Task<List<UserAccount>> GetUserAccountsAsync()
+    {
+        var res = await _http.GetStringAsync("/rest/v1/UserAccounts?order=created_at.desc");
+        return JsonSerializer.Deserialize<List<UserAccount>>(res, _json) ?? [];
+    }
+
+    public async Task CreateUserAccountAsync(UserAccount a)
+    {
+        var body = JsonSerializer.Serialize(new
+        {
+            name = a.Name,
+            username = a.Username,
+            password = a.Password,
+            role = a.Role,
+            created_at = DateTimeOffset.UtcNow.ToString("o"),
+        });
+        var req = new HttpRequestMessage(HttpMethod.Post, "/rest/v1/UserAccounts")
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+        req.Headers.Add("Prefer", "return=minimal");
+        await _http.SendAsync(req);
+    }
+
+    public async Task UpdateUserAccountAsync(UserAccount a)
+    {
+        var bodyObj = string.IsNullOrWhiteSpace(a.Password)
+            ? (object)new { name = a.Name, username = a.Username, role = a.Role }
+            : new { name = a.Name, username = a.Username, password = a.Password, role = a.Role };
+        var body = JsonSerializer.Serialize(bodyObj);
+        var req = new HttpRequestMessage(HttpMethod.Patch, $"/rest/v1/UserAccounts?id=eq.{a.Id}")
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+        req.Headers.Add("Prefer", "return=minimal");
+        await _http.SendAsync(req);
+    }
+
+    public async Task DeleteUserAccountAsync(long id)
+    {
+        await _http.DeleteAsync($"/rest/v1/UserAccounts?id=eq.{id}");
+    }
 }

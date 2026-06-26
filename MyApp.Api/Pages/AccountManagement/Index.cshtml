@@ -1,0 +1,158 @@
+@page
+@model MyApp.Api.Pages.AccountManagement.IndexModel
+@{
+    ViewData["Title"] = "帳號管理";
+    ViewData["Page"] = "accounts";
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">✅ @TempData["Success"]</div>
+}
+
+<form method="get" class="search-bar">
+    <div>
+        <label>搜尋帳號 / 姓名</label>
+        <input type="text" name="searchName" value="@Model.SearchName" placeholder="搜尋..." />
+    </div>
+    <button type="submit" class="btn btn-primary">🔍 查詢</button>
+    <a href="/AccountManagement" class="btn btn-secondary">重設</a>
+</form>
+
+<div class="card">
+    <div class="card-header">
+        <h2>帳號清單（共 @Model.Accounts.Count 筆）</h2>
+        <button class="btn btn-success" onclick="openCreateModal()">＋ 新增帳號</button>
+    </div>
+
+    @if (Model.Accounts.Count == 0)
+    {
+        <div class="empty">目前沒有符合條件的帳號</div>
+    }
+    else
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>姓名</th>
+                    <th>帳號</th>
+                    <th>權限</th>
+                    <th>建立時間</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var a in Model.Accounts)
+                {
+                    <tr>
+                        <td>@a.Id</td>
+                        <td>@a.Name</td>
+                        <td>@a.Username</td>
+                        <td>
+                            <span class="badge @(a.Role == "admin" ? "badge-blue" : "badge-gray")">
+                                @(a.Role == "admin" ? "管理員" : "一般使用者")
+                            </span>
+                        </td>
+                        <td>@a.CreatedAt.ToLocalTime().ToString("yyyy/MM/dd HH:mm")</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn btn-warning"
+                                    onclick="openEditModal(@a.Id, '@a.Name', '@a.Username', '@a.Role')">
+                                    編輯
+                                </button>
+                                <form method="post" asp-page-handler="Delete" onsubmit="return confirm('確定刪除帳號「@a.Username」？')">
+                                    <input type="hidden" name="id" value="@a.Id" />
+                                    <button type="submit" class="btn btn-danger">刪除</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- 新增 Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal">
+        <h3>＋ 新增帳號</h3>
+        <form method="post" asp-page-handler="Create">
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" name="Name" required placeholder="請輸入姓名" />
+            </div>
+            <div class="form-group">
+                <label>帳號</label>
+                <input type="text" name="Username" required placeholder="請輸入帳號" />
+            </div>
+            <div class="form-group">
+                <label>密碼</label>
+                <input type="password" name="Password" required placeholder="請輸入密碼" />
+            </div>
+            <div class="form-group">
+                <label>權限</label>
+                <select name="Role">
+                    <option value="user">一般使用者</option>
+                    <option value="admin">管理員</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createModal')">取消</button>
+                <button type="submit" class="btn btn-success">新增</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 編輯 Modal -->
+<div class="modal-overlay" id="editModal">
+    <div class="modal">
+        <h3>✏️ 編輯帳號</h3>
+        <form method="post" asp-page-handler="Edit">
+            <input type="hidden" name="Id" id="editId" />
+            <div class="form-group">
+                <label>姓名</label>
+                <input type="text" name="Name" id="editName" required />
+            </div>
+            <div class="form-group">
+                <label>帳號</label>
+                <input type="text" name="Username" id="editUsername" required />
+            </div>
+            <div class="form-group">
+                <label>密碼（留空不修改）</label>
+                <input type="password" name="Password" id="editPassword" placeholder="留空則不修改密碼" />
+            </div>
+            <div class="form-group">
+                <label>權限</label>
+                <select name="Role" id="editRole">
+                    <option value="user">一般使用者</option>
+                    <option value="admin">管理員</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">取消</button>
+                <button type="submit" class="btn btn-primary">儲存</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function openCreateModal() { document.getElementById('createModal').classList.add('show'); }
+    function openEditModal(id, name, username, role) {
+        document.getElementById('editId').value = id;
+        document.getElementById('editName').value = name;
+        document.getElementById('editUsername').value = username;
+        document.getElementById('editPassword').value = '';
+        document.getElementById('editRole').value = role;
+        document.getElementById('editModal').classList.add('show');
+    }
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+    document.querySelectorAll('.modal-overlay').forEach(el => {
+        el.addEventListener('click', e => { if (e.target === el) el.classList.remove('show'); });
+    });
+</script>
+}
