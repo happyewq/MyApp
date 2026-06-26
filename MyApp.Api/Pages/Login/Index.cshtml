@@ -3,116 +3,100 @@
 @{
     Layout = null;
 }
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BNI 預約資訊系統</title>
+    <title>BNI 預約資訊系統 - 登入</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a56db 0%, #0e3a8a 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            min-height: 100vh; display: flex;
+            background: #0f172a;
         }
-        .login-card {
-            background: white;
-            border-radius: 16px;
-            padding: 48px 40px;
-            width: 400px;
-            max-width: 95vw;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        .left-panel {
+            flex: 1; background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 50%, #0f172a 100%);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            padding: 60px; position: relative; overflow: hidden;
         }
-        .logo {
-            text-align: center;
-            margin-bottom: 32px;
+        .left-panel::before {
+            content: ''; position: absolute; inset: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(59,130,246,0.15) 0%, transparent 60%);
         }
-        .logo .title {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #1a56db;
-            margin-bottom: 4px;
+        .left-content { position: relative; z-index: 1; text-align: center; color: white; }
+        .bni-logo { font-size: 5rem; font-weight: 900; letter-spacing: 12px; line-height: 1; margin-bottom: 16px; }
+        .bni-tagline { font-size: 1.2rem; opacity: 0.75; letter-spacing: 2px; margin-bottom: 48px; }
+        .feature-list { text-align: left; }
+        .feature-item { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 0.9rem; opacity: 0.8; }
+        .feature-dot { width: 8px; height: 8px; background: #60a5fa; border-radius: 50%; flex-shrink: 0; }
+
+        .right-panel {
+            width: 480px; background: white;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 60px 48px;
         }
-        .logo .subtitle {
-            font-size: 0.9rem;
-            color: #6b7280;
-        }
-        .logo .bni-badge {
-            display: inline-block;
-            background: #1a56db;
-            color: white;
-            font-size: 1.8rem;
-            font-weight: 900;
-            padding: 8px 20px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-            letter-spacing: 4px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 0.85rem;
-            color: #374151;
-            margin-bottom: 6px;
-            font-weight: 500;
-        }
+        .login-header { margin-bottom: 36px; }
+        .login-header h1 { font-size: 1.7rem; font-weight: 800; color: #111827; }
+        .login-header p { font-size: 0.875rem; color: #6b7280; margin-top: 6px; }
+
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 0.82rem; color: #374151; margin-bottom: 7px; font-weight: 600; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 1rem; opacity: 0.5; }
         .form-group input {
-            width: 100%;
-            padding: 12px 14px;
-            border: 1.5px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            transition: border-color 0.2s;
+            width: 100%; padding: 12px 14px 12px 40px;
+            border: 1.5px solid #e5e7eb; border-radius: 10px;
+            font-size: 0.925rem; color: #111827; background: #fafafa;
+            transition: all 0.15s;
         }
-        .form-group input:focus {
-            outline: none;
-            border-color: #1a56db;
-            box-shadow: 0 0 0 3px rgba(26,86,219,0.1);
-        }
+        .form-group input:focus { outline: none; border-color: #3b82f6; background: white; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
+
         .btn-login {
-            width: 100%;
-            padding: 13px;
-            background: #1a56db;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.2s;
-            margin-top: 8px;
+            width: 100%; padding: 14px;
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            color: white; border: none; border-radius: 10px;
+            font-size: 0.95rem; font-weight: 700; cursor: pointer;
+            transition: all 0.2s; margin-top: 8px;
+            box-shadow: 0 4px 15px rgba(29,78,216,0.35);
         }
-        .btn-login:hover { background: #1648c0; }
+        .btn-login:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(29,78,216,0.4); }
+        .btn-login:active { transform: translateY(0); }
+
         .error {
-            background: #fde8e8;
-            color: #9b1c1c;
-            border: 1px solid #f8b4b4;
-            border-radius: 6px;
-            padding: 10px 14px;
-            font-size: 0.88rem;
-            margin-bottom: 16px;
+            background: #fef2f2; color: #991b1b;
+            border: 1px solid #fecaca; border-radius: 8px;
+            padding: 11px 14px; font-size: 0.85rem;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
         }
-        .footer {
-            text-align: center;
-            margin-top: 24px;
-            font-size: 0.8rem;
-            color: #9ca3af;
+
+        .login-footer { text-align: center; margin-top: 32px; font-size: 0.78rem; color: #9ca3af; }
+
+        @@media (max-width: 768px) {
+            .left-panel { display: none; }
+            .right-panel { width: 100%; padding: 40px 28px; }
         }
     </style>
 </head>
 <body>
-    <div class="login-card">
-        <div class="logo">
-            <div class="bni-badge">BNI</div>
-            <div class="title">預約資訊系統</div>
-            <div class="subtitle">Business Network International</div>
+    <div class="left-panel">
+        <div class="left-content">
+            <div class="bni-logo">BNI</div>
+            <div class="bni-tagline">Business Network International</div>
+            <div class="feature-list">
+                <div class="feature-item"><div class="feature-dot"></div>預約管理系統</div>
+                <div class="feature-item"><div class="feature-dot"></div>使用者資料管理</div>
+                <div class="feature-item"><div class="feature-dot"></div>帳號權限控管</div>
+                <div class="feature-item"><div class="feature-dot"></div>即時資料同步</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="right-panel">
+        <div class="login-header">
+            <h1>歡迎回來 👋</h1>
+            <p>請登入您的帳號以繼續使用系統</p>
         </div>
 
         @if (Model.ErrorMessage != null)
@@ -123,16 +107,22 @@
         <form method="post">
             <div class="form-group">
                 <label>帳號</label>
-                <input type="text" name="username" placeholder="請輸入帳號" required autofocus />
+                <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <input type="text" name="username" placeholder="請輸入帳號" required autofocus />
+                </div>
             </div>
             <div class="form-group">
                 <label>密碼</label>
-                <input type="password" name="password" placeholder="請輸入密碼" required />
+                <div class="input-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" name="password" placeholder="請輸入密碼" required />
+                </div>
             </div>
-            <button type="submit" class="btn-login">登入</button>
+            <button type="submit" class="btn-login">登入系統</button>
         </form>
 
-        <div class="footer">© 2026 BNI 預約資訊系統</div>
+        <div class="login-footer">© 2026 BNI 預約資訊系統．版權所有</div>
     </div>
 </body>
 </html>
